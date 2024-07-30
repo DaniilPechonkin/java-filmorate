@@ -16,6 +16,7 @@ import java.util.List;
 @Slf4j
 public class UserController {
     private final List<User> users = new ArrayList<>();
+
     @PostMapping
     public ResponseEntity<User> addUser(@RequestBody User user) {
         try {
