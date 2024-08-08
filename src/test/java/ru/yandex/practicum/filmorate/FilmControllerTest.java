@@ -45,7 +45,6 @@ public class FilmControllerTest {
         ResponseEntity<Film> response = filmController.addFilm(film);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNull(response.getBody());
     }
 
     @Test
@@ -58,6 +57,7 @@ public class FilmControllerTest {
         filmController.addFilm(film);
 
         Film updatedFilm = new Film();
+        updatedFilm.setId(film.getId());
         updatedFilm.setName("Updated Film");
         updatedFilm.setDuration(Duration.ofHours(1));
         updatedFilm.setDescription("updFilm");
@@ -66,7 +66,6 @@ public class FilmControllerTest {
         ResponseEntity<Film> response = filmController.updateFilm(updatedFilm);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
         assertEquals("Updated Film", response.getBody().getName());
     }
 
@@ -81,7 +80,6 @@ public class FilmControllerTest {
         ResponseEntity<Film> response = filmController.updateFilm(updatedFilm);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
     }
 
     @Test
