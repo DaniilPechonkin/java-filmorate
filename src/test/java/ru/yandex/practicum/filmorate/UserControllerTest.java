@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,7 +27,7 @@ class UserControllerTest {
         user.setLogin("validUser");
         user.setEmail("user@example.com");
         user.setName("example");
-        user.setBirthday(LocalDateTime.now());
+        user.setBirthday(LocalDate.now());
 
         ResponseEntity<User> response = userController.addUser(user);
 
@@ -42,12 +42,11 @@ class UserControllerTest {
         user.setLogin("");
         user.setEmail("user@example.com");
         user.setName("example");
-        user.setBirthday(LocalDateTime.now());
+        user.setBirthday(LocalDate.now());
 
         ResponseEntity<User> response = userController.addUser(user);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNull(response.getBody());
     }
 
     @Test
@@ -56,19 +55,19 @@ class UserControllerTest {
         user.setLogin("firstUser");
         user.setEmail("user@example.com");
         user.setName("example");
-        user.setBirthday(LocalDateTime.now());
+        user.setBirthday(LocalDate.now());
         userController.addUser(user);
 
         User updatedUser = new User();
+        updatedUser.setId((user.getId()));
         updatedUser.setLogin("updatedUser");
         updatedUser.setEmail("updated@example.com");
         updatedUser.setName("updExample");
-        updatedUser.setBirthday(LocalDateTime.now());
+        updatedUser.setBirthday(LocalDate.now());
 
-        ResponseEntity<User> response = userController.updateUser(0, updatedUser);
+        ResponseEntity<User> response = userController.updateUser(updatedUser);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
         assertEquals("updatedUser", response.getBody().getLogin());
     }
 
@@ -78,12 +77,11 @@ class UserControllerTest {
         updatedUser.setLogin("updatedUser");
         updatedUser.setEmail("user@example.com");
         updatedUser.setName("example");
-        updatedUser.setBirthday(LocalDateTime.now());
+        updatedUser.setBirthday(LocalDate.now());
 
-        ResponseEntity<User> response = userController.updateUser(0, updatedUser);
+        ResponseEntity<User> response = userController.updateUser(updatedUser);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
     }
 
     @Test
@@ -92,14 +90,14 @@ class UserControllerTest {
         user1.setLogin("user1");
         user1.setEmail("user1@example.com");
         user1.setName("example1");
-        user1.setBirthday(LocalDateTime.now());
+        user1.setBirthday(LocalDate.now());
         userController.addUser(user1);
 
         User user2 = new User();
         user2.setLogin("user2");
         user2.setEmail("user2@example.com");
         user2.setName("example2");
-        user2.setBirthday(LocalDateTime.now());
+        user2.setBirthday(LocalDate.now());
         userController.addUser(user2);
 
         ResponseEntity<List<User>> response = userController.getAllUsers();

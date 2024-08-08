@@ -16,34 +16,52 @@ import java.util.List;
 @Slf4j
 public class UserController {
     private final List<User> users = new ArrayList<>();
+    private int nextId = 1;
 
     @PostMapping
     public ResponseEntity<User> addUser(@RequestBody User user) {
         try {
             UserValidator.validate(user);
+            user.setId(nextId++);
             users.add(user);
             log.info("Пользователь добавлен: " + user.getLogin());
             return new ResponseEntity<>(user, HttpStatus.CREATED);
         } catch (ValidationException e) {
             log.error("Ошибка валидации при добавлении пользователя: " + e.getMessage());
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(user);
         }
     }
 
-    @PutMapping("/{index}")
-    public ResponseEntity<User> updateUser(@PathVariable int index, @RequestBody User user) {
+    @PutMapping
+    public ResponseEntity<User> updateUser(@RequestBody User user) {
+        if (user == null) {
+            log.error("Фильм не может быть null");
+            return ResponseEntity.badRequest().build();
+        }
+
         try {
             UserValidator.validate(user);
-            if (index < 0 || index >= users.size()) {
-                log.warn("Пользователь с индексом " + index + " не найден для обновления.");
-                return ResponseEntity.notFound().build();
+            int id = user.getId();
+            int index = -1;
+
+            for (int i = 0; i < users.size(); i++) {
+                if (users.get(i).getId() == id) {
+                    index = i;
+                    break;
+                }
             }
-            users.set(index, user);
-            log.info("Пользователь обновлён: " + user.getLogin());
-            return ResponseEntity.ok(user);
+
+            if (index != -1) {
+                users.set(index, user);
+                log.info("Фильм обновлён: " + user.getName());
+                return ResponseEntity.ok(user);
+            } else {
+                log.info("Индекс не найден");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(user);
+            }
         } catch (ValidationException e) {
-            log.error("Ошибка валидации при обновлении пользователя: " + e.getMessage());
-            return ResponseEntity.badRequest().body(null);
+            log.error("Ошибка валидации при обновлении фильма: " + e.getMessage());
+            return ResponseEntity.badRequest().body(user);
         }
     }
 

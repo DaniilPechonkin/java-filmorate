@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,7 +27,7 @@ public class FilmControllerTest {
         film.setName("Valid Film");
         film.setDuration(Duration.ofHours(1));
         film.setDescription("film");
-        film.setReleaseDate(LocalDateTime.now());
+        film.setReleaseDate(LocalDate.now());
 
 
         ResponseEntity<Film> response = filmController.addFilm(film);
@@ -54,16 +54,16 @@ public class FilmControllerTest {
         film.setName("First Film");
         film.setDuration(Duration.ofHours(1));
         film.setDescription("film");
-        film.setReleaseDate(LocalDateTime.now());
+        film.setReleaseDate(LocalDate.now());
         filmController.addFilm(film);
 
         Film updatedFilm = new Film();
         updatedFilm.setName("Updated Film");
         updatedFilm.setDuration(Duration.ofHours(1));
         updatedFilm.setDescription("updFilm");
-        updatedFilm.setReleaseDate(LocalDateTime.now());
+        updatedFilm.setReleaseDate(LocalDate.now());
 
-        ResponseEntity<Film> response = filmController.updateFilm(0, updatedFilm);
+        ResponseEntity<Film> response = filmController.updateFilm(updatedFilm);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -76,9 +76,9 @@ public class FilmControllerTest {
         updatedFilm.setName("Updated Film");
         updatedFilm.setDuration(Duration.ofHours(1));
         updatedFilm.setDescription("updFilm");
-        updatedFilm.setReleaseDate(LocalDateTime.now());
+        updatedFilm.setReleaseDate(LocalDate.now());
 
-        ResponseEntity<Film> response = filmController.updateFilm(0, updatedFilm);
+        ResponseEntity<Film> response = filmController.updateFilm(updatedFilm);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
@@ -90,14 +90,14 @@ public class FilmControllerTest {
         film1.setName("Film 1");
         film1.setDuration(Duration.ofHours(1));
         film1.setDescription("film1");
-        film1.setReleaseDate(LocalDateTime.now());
+        film1.setReleaseDate(LocalDate.now());
         filmController.addFilm(film1);
 
         Film film2 = new Film();
         film2.setName("Film 2");
         film2.setDuration(Duration.ofHours(1));
         film2.setDescription("film2");
-        film2.setReleaseDate(LocalDateTime.now());
+        film2.setReleaseDate(LocalDate.now());
         filmController.addFilm(film2);
 
         ResponseEntity<List<Film>> response = filmController.getAllFilms();
