@@ -13,7 +13,7 @@ public class UserValidator {
         if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
             throw new ValidationException("Логин не должен быть пустым и содержать пробелов.");
         }
-        if (user.getName() == null || user.getName().isEmpty() ) {
+        if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
         if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
