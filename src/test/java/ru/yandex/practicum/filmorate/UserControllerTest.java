@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate;
 
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,9 +45,9 @@ class UserControllerTest {
         user.setName("example");
         user.setBirthday(LocalDate.now());
 
-        ResponseEntity<User> response = userController.addUser(user);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertThrows(ValidationException.class, () -> {
+            userController.addUser(user);
+        });
     }
 
     @Test
