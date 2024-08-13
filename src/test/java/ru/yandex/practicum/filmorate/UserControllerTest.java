@@ -38,16 +38,86 @@ class UserControllerTest {
     }
 
     @Test
-    void addUser_InvalidUser_ReturnsBadRequest() {
+    void addUser_EmptyLogin_ReturnsBadRequest() {
         User user = new User();
         user.setLogin("");
         user.setEmail("user@example.com");
         user.setName("example");
         user.setBirthday(LocalDate.now());
 
-        assertThrows(ValidationException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             userController.addUser(user);
         });
+
+        assertEquals("Логин не должен быть пустым и содержать пробелов.", exception.getMessage());
+    }
+
+    @Test
+    void addUser_SpaceLogin_ReturnsBadRequest() {
+        User user = new User();
+        user.setLogin("1 2 3");
+        user.setEmail("user@example.com");
+        user.setName("example");
+        user.setBirthday(LocalDate.now());
+
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            userController.addUser(user);
+        });
+
+        assertEquals("Логин не должен быть пустым и содержать пробелов.", exception.getMessage());
+    }
+
+    @Test
+    void addUser_InvalidEmail_ReturnsBadRequest() {
+        User user = new User();
+        user.setLogin("User");
+        user.setBirthday(LocalDate.now());
+        user.setEmail("12345");
+
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            userController.addUser(user);
+        });
+
+        assertEquals("Почта не должна быть пустой и должна содержать @.", exception.getMessage());
+    }
+
+    @Test
+    void addUser_EmptyEmail_ReturnsBadRequest() {
+        User user = new User();
+        user.setLogin("User");
+        user.setBirthday(LocalDate.now());
+        user.setEmail("");
+
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            userController.addUser(user);
+        });
+
+        assertEquals("Почта не должна быть пустой и должна содержать @.", exception.getMessage());
+    }
+
+    @Test
+    void addUser_EmptyName_ReturnsOkResponse() {
+        User user = new User();
+        user.setLogin("User");
+        user.setEmail("user@example.com");
+        user.setBirthday(LocalDate.now());
+        userController.addUser(user);
+
+        assertEquals(user.getName(), "User");
+    }
+
+    @Test
+    void addUser_InvalidBirthday_ReturnsBadRequest() {
+        User user = new User();
+        user.setLogin("User");
+        user.setEmail("user@example.com");
+        user.setBirthday(LocalDate.of(2030, 1, 1));
+
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            userController.addUser(user);
+        });
+
+        assertEquals("Дата рождения не может быть в будущем.", exception.getMessage());
     }
 
     @Test
