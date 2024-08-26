@@ -1,57 +1,62 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.validator.FilmValidator;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
+@RequiredArgsConstructor
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int nextId = 1;
+    private final FilmService filmService;
 
     @PostMapping
     public ResponseEntity<Film> addFilm(@RequestBody Film film) {
-        FilmValidator.validate(film);
-
-        film.setId(nextId);
-        films.put(nextId++, film);
-        log.info("Фильм добавлен: " + film.getName());
-        return new ResponseEntity<>(film, HttpStatus.CREATED);
+        Film createdFilm = filmService.addFilm(film);
+        return new ResponseEntity<>(createdFilm, HttpStatus.CREATED);
     }
 
     @PutMapping
     public ResponseEntity<Film> updateFilm(@RequestBody Film film) {
-        if (film == null) {
-            log.error("Фильм не может быть null");
-            return ResponseEntity.badRequest().build();
-        }
-
-        FilmValidator.validate(film);
-        int id = film.getId();
-
-        if (films.containsKey(id)) {
-            films.put(id, film);
-            log.info("Фильм обновлён: " + film.getName());
-            return ResponseEntity.ok(film);
-        } else {
-            log.info("Индекс не найден");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(film);
-        }
+        Film updatedFilm = filmService.updateFilm(film);
+        return ResponseEntity.ok(updatedFilm);
     }
 
     @GetMapping
     public ResponseEntity<List<Film>> getAllFilms() {
-        List<Film> filmsList = new ArrayList<>(films.values());
+        List<Film> filmsList = new ArrayList<>(filmService.getFilms());
         return ResponseEntity.ok(filmsList);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Film> getFilm(@PathVariable int id) {
+        Film film = filmService.getFilm(id);
+        return ResponseEntity.ok().body(film);
+    }
+
+    @PutMapping("/{filmId}/like/{userId}")
+    public ResponseEntity<Film> addLike(@PathVariable int filmId, @PathVariable int userId) {
+        filmService.addLike(filmId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{filmId}/like/{userId}")
+    public ResponseEntity<Film> removeLike(@PathVariable int filmId, @PathVariable int userId) {
+        filmService.removeLike(filmId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<List<Film>> getTopFilms(@RequestParam(defaultValue = "10") int count) {
+        List<Film> topFilms = filmService.getTopFilms(count);
+        return ResponseEntity.ok(topFilms);
     }
 }

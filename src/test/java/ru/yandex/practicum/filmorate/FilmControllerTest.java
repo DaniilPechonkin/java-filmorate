@@ -1,12 +1,18 @@
 package ru.yandex.practicum.filmorate;
 
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,7 +24,10 @@ public class FilmControllerTest {
 
     @BeforeEach
     void setUp() {
-        filmController = new FilmController();
+        FilmStorage filmStorage = new InMemoryFilmStorage();
+        UserStorage userStorage = new InMemoryUserStorage();
+        FilmService filmService = new FilmService(userStorage, filmStorage);
+        filmController = new FilmController(filmService);
     }
 
     @Test
@@ -122,9 +131,10 @@ public class FilmControllerTest {
         updatedFilm.setDescription("updFilm");
         updatedFilm.setReleaseDate(LocalDate.now());
 
-        ResponseEntity<Film> response = filmController.updateFilm(updatedFilm);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
+            filmController.updateFilm(updatedFilm);
+        });
+        assertEquals("Фильм не существует", exception.getMessage());
     }
 
     @Test

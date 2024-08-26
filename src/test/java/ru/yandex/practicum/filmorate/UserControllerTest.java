@@ -1,12 +1,16 @@
 package ru.yandex.practicum.filmorate;
 
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +23,9 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        userController = new UserController();
+        UserStorage userStorage = new InMemoryUserStorage();
+        UserService userService = new UserService(userStorage);
+        userController = new UserController(userService);
     }
 
     @Test
@@ -150,9 +156,10 @@ class UserControllerTest {
         updatedUser.setName("example");
         updatedUser.setBirthday(LocalDate.now());
 
-        ResponseEntity<User> response = userController.updateUser(updatedUser);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
+            userController.updateUser(updatedUser);
+        });
+        assertEquals("Пользователь не существует", exception.getMessage());
     }
 
     @Test

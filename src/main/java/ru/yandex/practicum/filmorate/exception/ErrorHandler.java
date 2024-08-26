@@ -14,4 +14,16 @@ public class ErrorHandler {
     public ResponseEntity<Object> handleValidationException(final ValidationException e, Object item) {
         return ResponseEntity.badRequest().body(item);
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<Object> handleGenericException(Exception e, Object item) {
+        return ResponseEntity.internalServerError().body(item);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException e, Object item) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(item);
+    }
 }
