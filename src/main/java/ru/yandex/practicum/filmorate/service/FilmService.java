@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -11,13 +10,12 @@ import ru.yandex.practicum.filmorate.validator.FilmValidator;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
-    FilmStorage filmStorage;
-    UserStorage userStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public FilmService(UserStorage userStorage, FilmStorage filmStorage) {
@@ -29,7 +27,7 @@ public class FilmService {
         return filmStorage.getFilm(id);
     }
 
-    public Map<Integer, Film> getFilms() {
+    public List<Film> getFilms() {
         return filmStorage.getFilms();
     }
 
@@ -41,28 +39,17 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
-    public boolean addLike(int filmId, int userId) {
-        Film film = filmStorage.getFilms().get(filmId);
-        User user = userStorage.getUsers().get(userId);
-        if (user == null || film == null) {
-            throw new ResourceNotFoundException("Пользователь или фильм не найден " + (user == null ? userId : filmId));
-        }
+    public void addLike(int filmId, int userId) {
+        Film film = filmStorage.getFilm(filmId);
+        User user = userStorage.getUser(userId);
         UserValidator.validate(user);
         FilmValidator.validate(film);
-
-        if (!film.getLikes().contains(userId)) {
-            film.getLikes().add(userId);
-            return true;
-        }
-        return false;
+        film.getLikes().add(userId);
     }
 
     public void removeLike(int filmId, int userId) {
-        Film film = filmStorage.getFilms().get(filmId);
-        User user = userStorage.getUsers().get(userId);
-        if (user == null || film == null) {
-            throw new ResourceNotFoundException("Пользователь или фильм не найден " + (user == null ? userId : filmId));
-        }
+        Film film = filmStorage.getFilm(filmId);
+        User user = userStorage.getUser(userId);
         UserValidator.validate(user);
         FilmValidator.validate(film);
 
@@ -70,7 +57,7 @@ public class FilmService {
     }
 
     public List<Film> getTopFilms(int count) {
-        return filmStorage.getFilms().values().stream()
+        return filmStorage.getFilms().stream()
                 .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
                 .limit(count)
                 .collect(Collectors.toList());

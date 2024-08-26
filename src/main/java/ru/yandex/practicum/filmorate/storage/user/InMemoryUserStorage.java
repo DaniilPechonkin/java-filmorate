@@ -1,21 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-@RestController
-@RequestMapping("/users")
-@Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    @Getter
     private final Map<Integer, User> users = new HashMap<>();
     private int nextId = 1;
 
@@ -32,15 +28,25 @@ public class InMemoryUserStorage implements UserStorage {
         UserValidator.validate(user);
         int id = user.getId();
 
-        if (users.containsKey(id)) {
+        if (user != null && users.containsKey(id)) {
             users.put(id, user);
             return user;
+        } else {
+            throw new ResourceNotFoundException("Пользователь не существует");
         }
-        return null;
     }
 
     @Override
     public User getUser(int id) {
-        return users.getOrDefault(id, null);
+        User user = users.getOrDefault(id, null);
+        if (user == null) {
+            throw new ResourceNotFoundException("Пользователь с id " + id + " не найден");
+        }
+        return user;
+    }
+
+    @Override
+    public List<User> getUsers() {
+        return new ArrayList<>(users.values());
     }
 }

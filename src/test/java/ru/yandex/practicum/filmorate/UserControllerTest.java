@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate;
 
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -155,9 +156,10 @@ class UserControllerTest {
         updatedUser.setName("example");
         updatedUser.setBirthday(LocalDate.now());
 
-        ResponseEntity<User> response = userController.updateUser(updatedUser);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
+            userController.updateUser(updatedUser);
+        });
+        assertEquals("Пользователь не существует", exception.getMessage());
     }
 
     @Test

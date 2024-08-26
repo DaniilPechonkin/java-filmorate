@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
@@ -12,12 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController
-@RequestMapping("/films")
-@Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-    @Getter
     private final Map<Integer, Film> films = new HashMap<>();
     private int nextId = 1;
 
@@ -34,20 +28,25 @@ public class InMemoryFilmStorage implements FilmStorage {
         FilmValidator.validate(film);
         int id = film.getId();
 
-        if (films.containsKey(id)) {
+        if (film != null && films.containsKey(id)) {
             films.put(id, film);
             return film;
+        } else {
+            throw new ResourceNotFoundException("Фильм не существует");
         }
-        return null;
     }
 
     @Override
-    public List<Film> getAllFilms() {
+    public List<Film> getFilms() {
         return new ArrayList<>(films.values());
     }
 
     @Override
     public Film getFilm(int id) {
-        return films.getOrDefault(id, null);
+        Film film = films.getOrDefault(id, null);
+        if (film == null) {
+            throw new ResourceNotFoundException("Фильм с id " + id + " не найден");
+        }
+        return film;
     }
 }
